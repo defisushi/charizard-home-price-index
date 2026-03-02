@@ -179,26 +179,30 @@
 
 <script>
 const assets = [
-  { id: "median-home-singapore", label: "Median Home Price (Singapore)", category: "Real Estate", currentValue: 1200000, historicalValues: [
+  { id: "median-home-singapore", label: "Median Home Price (Singapore)", category: "Real Estate", currentValue: 293848, historicalValues: [
     {date:"2019-01",value:850000},{date:"2019-06",value:860000},{date:"2020-01",value:870000},{date:"2020-06",value:880000},
     {date:"2021-01",value:920000},{date:"2021-06",value:970000},{date:"2022-01",value:1020000},{date:"2022-06",value:1080000},
     {date:"2023-01",value:1100000},{date:"2023-06",value:1120000},{date:"2024-01",value:1140000},{date:"2024-06",value:1170000},{date:"2025-01",value:1200000}
-  ]},
-  { id: "median-home-nyc", label: "Median Home Price (New York)", category: "Real Estate", currentValue: 780000, historicalValues: [
+  ,
+    {date:"2026-03",value:293848}]},
+  { id: "median-home-nyc", label: "Median Home Price (New York)", category: "Real Estate", currentValue: 379829, historicalValues: [
     {date:"2019-01",value:560000},{date:"2019-06",value:570000},{date:"2020-01",value:575000},{date:"2020-06",value:560000},
     {date:"2021-01",value:600000},{date:"2021-06",value:650000},{date:"2022-01",value:680000},{date:"2022-06",value:720000},
     {date:"2023-01",value:710000},{date:"2023-06",value:730000},{date:"2024-01",value:740000},{date:"2024-06",value:760000},{date:"2025-01",value:780000}
-  ]},
-  { id: "median-home-london", label: "Median Home Price (London)", category: "Real Estate", currentValue: 650000, historicalValues: [
+  ,
+    {date:"2026-03",value:379829}]},
+  { id: "median-home-london", label: "Median Home Price (London)", category: "Real Estate", currentValue: 201215, historicalValues: [
     {date:"2019-01",value:600000},{date:"2019-06",value:605000},{date:"2020-01",value:590000},{date:"2020-06",value:580000},
     {date:"2021-01",value:600000},{date:"2021-06",value:620000},{date:"2022-01",value:640000},{date:"2022-06",value:660000},
     {date:"2023-01",value:640000},{date:"2023-06",value:635000},{date:"2024-01",value:630000},{date:"2024-06",value:640000},{date:"2025-01",value:650000}
-  ]},
-  { id: "median-home-tokyo", label: "Median Home Price (Tokyo)", category: "Real Estate", currentValue: 450000, historicalValues: [
+  ,
+    {date:"2026-03",value:201215}]},
+  { id: "median-home-tokyo", label: "Median Home Price (Tokyo)", category: "Real Estate", currentValue: 15347421, historicalValues: [
     {date:"2019-01",value:330000},{date:"2019-06",value:335000},{date:"2020-01",value:340000},{date:"2020-06",value:345000},
     {date:"2021-01",value:355000},{date:"2021-06",value:365000},{date:"2022-01",value:375000},{date:"2022-06",value:390000},
     {date:"2023-01",value:400000},{date:"2023-06",value:410000},{date:"2024-01",value:420000},{date:"2024-06",value:435000},{date:"2025-01",value:450000}
-  ]}
+  ,
+    {date:"2026-03",value:15347421}]}
 ];
 
 const pokemonCards = [
@@ -207,25 +211,29 @@ const pokemonCards = [
     {date:"2019-01",price:55000},{date:"2019-06",price:60000},{date:"2020-01",price:80000},{date:"2020-06",price:130000},
     {date:"2021-01",price:350000},{date:"2021-06",price:420000},{date:"2022-01",price:400000},{date:"2022-06",price:380000},
     {date:"2023-01",price:340000},{date:"2023-06",price:360000},{date:"2024-01",price:400000},{date:"2024-06",price:410000},{date:"2025-01",price:420000}
-  ]},
+  ,
+    {date:"2026-03",price:420000}]},
   { id: "base-charizard-1st-ungraded", name: "Charizard", label: "1st Ed. Base Set Charizard Ungraded", currentPrice: 10000,
     image: "https://images.pokemontcg.io/base1/4_hires.png", historicalPrices: [
     {date:"2019-01",price:1500},{date:"2019-06",price:1800},{date:"2020-01",price:3000},{date:"2020-06",price:5000},
     {date:"2021-01",price:12000},{date:"2021-06",price:15000},{date:"2022-01",price:13000},{date:"2022-06",price:11000},
     {date:"2023-01",price:9000},{date:"2023-06",price:9500},{date:"2024-01",price:9800},{date:"2024-06",price:10000},{date:"2025-01",price:10000}
-  ]},
-  { id: "base-charizard-unlimited-psa10", name: "Charizard", label: "Unlimited Base Set Charizard PSA 10", currentPrice: 7500,
+  ,
+    {date:"2026-03",price:10000}]},
+  { id: "base-charizard-unlimited-psa10", name: "Charizard", label: "Unlimited Base Set Charizard PSA 10", currentPrice: 316,
     image: "https://storage.googleapis.com/images.pricecharting.com/v26m3g4sjpch7yry/240.jpg", historicalPrices: [
     {date:"2019-01",price:1200},{date:"2019-06",price:1400},{date:"2020-01",price:2000},{date:"2020-06",price:3500},
     {date:"2021-01",price:8000},{date:"2021-06",price:9000},{date:"2022-01",price:8500},{date:"2022-06",price:7000},
     {date:"2023-01",price:6000},{date:"2023-06",price:6500},{date:"2024-01",price:7000},{date:"2024-06",price:7200},{date:"2025-01",price:7500}
-  ]},
-  { id: "base-charizard-unlimited-ungraded", name: "Charizard", label: "Unlimited Base Set Charizard Ungraded", currentPrice: 350,
+  ,
+    {date:"2026-03",price:316}]},
+  { id: "base-charizard-unlimited-ungraded", name: "Charizard", label: "Unlimited Base Set Charizard Ungraded", currentPrice: 629,
     image: "https://storage.googleapis.com/images.pricecharting.com/v26m3g4sjpch7yry/240.jpg", historicalPrices: [
     {date:"2019-01",price:150},{date:"2019-06",price:160},{date:"2020-01",price:200},{date:"2020-06",price:300},
     {date:"2021-01",price:450},{date:"2021-06",price:400},{date:"2022-01",price:350},{date:"2022-06",price:320},
     {date:"2023-01",price:300},{date:"2023-06",price:310},{date:"2024-01",price:330},{date:"2024-06",price:340},{date:"2025-01",price:350}
-  ]}
+  ,
+    {date:"2026-03",price:629}]}
 ];
 
 const assetSelect = document.getElementById("assetSelect");
