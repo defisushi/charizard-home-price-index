@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Charizard Home Price Index</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --background: hsl(225, 15%, 8%);
+      --foreground: hsl(40, 20%, 92%);
+      --card: hsl(225, 15%, 12%);
+      --card-foreground: hsl(40, 20%, 92%);
+      --popover: hsl(225, 15%, 14%);
+      --primary: hsl(25, 95%, 55%);
+      --primary-foreground: hsl(225, 15%, 5%);
+      --secondary: hsl(225, 12%, 18%);
+      --secondary-foreground: hsl(40, 15%, 80%);
+      --muted: hsl(225, 12%, 16%);
+      --muted-foreground: hsl(225, 10%, 50%);
+      --accent: hsl(45, 95%, 55%);
+      --accent-foreground: hsl(225, 15%, 5%);
+      --border: hsl(225, 12%, 20%);
+      --radius: 0.75rem;
+      --font-display: 'Space Grotesk', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; border-color: var(--border); }
+    body { background: var(--background); color: var(--foreground); font-family: var(--font-display); min-height: 100vh; display: flex; flex-direction: column; }
+
+    .font-mono { font-family: var(--font-mono); }
+    .font-display { font-family: var(--font-display); }
+    .text-muted { color: var(--muted-foreground); }
+    .text-primary { color: var(--primary); }
+    .text-accent { color: var(--accent); }
+    .text-secondary-fg { color: var(--secondary-foreground); }
+    .text-gradient {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .gradient-card {
+      background: linear-gradient(135deg, var(--card) 0%, hsl(225, 15%, 10%) 100%);
+      border: 1px solid var(--border);
+    }
+    .glow-primary { box-shadow: 0 0 30px -5px hsl(25, 95%, 55%, 0.3); }
+    .rounded-xl { border-radius: var(--radius); }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 10;
+      background: hsl(225, 15%, 8%, 0.95);
+      backdrop-filter: blur(4px);
+    }
+    .header-inner {
+      padding: 12px 16px;
+      max-width: 960px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .header-title { font-size: clamp(1.2rem, 4vw, 1.9rem); font-weight: 700; }
+    .header-subtitle { font-size: clamp(0.6rem, 2vw, 0.85rem); color: var(--muted-foreground); font-family: var(--font-mono); margin-top: 2px; }
+    .header-source { font-size: clamp(0.55rem, 1.5vw, 0.75rem); font-family: var(--font-mono); color: var(--muted-foreground); text-align: right; }
+
+    main { flex: 1; padding: 20px 16px; max-width: 960px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 20px; }
+
+    .selectors { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 640px) { .selectors { grid-template-columns: 1fr 1fr; } }
+    .selector-group { display: flex; flex-direction: column; gap: 8px; }
+    .selector-label { font-size: 0.75rem; font-family: var(--font-mono); color: var(--muted-foreground); text-transform: uppercase; letter-spacing: 0.1em; }
+    .selector-wrapper { position: relative; }
+    select {
+      width: 100%; height: 56px; padding: 0 40px 0 14px;
+      background: var(--secondary); border: 1px solid var(--border);
+      color: var(--foreground); font-size: clamp(0.85rem, 2.5vw, 1.1rem);
+      font-family: var(--font-display); border-radius: var(--radius);
+      appearance: none; cursor: pointer; outline: none;
+      transition: border-color 0.2s;
+    }
+    select:focus { border-color: var(--primary); }
+    .select-arrow {
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      pointer-events: none; color: var(--muted-foreground);
+    }
+    optgroup { background: var(--popover); color: var(--muted-foreground); font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; }
+    option { background: var(--popover); color: var(--foreground); font-family: var(--font-display); font-size: 0.95rem; }
+
+    .conversion-card { padding: clamp(16px, 3vw, 32px); display: flex; align-items: flex-start; gap: 16px; }
+    @media (min-width: 640px) { .conversion-card { align-items: center; gap: 40px; } }
+    .card-image { flex-shrink: 0; }
+    .card-image img { width: clamp(80px, 20vw, 176px); border-radius: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); display: block; }
+    .conversion-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+    .conversion-label { font-size: clamp(0.6rem, 1.5vw, 0.85rem); font-family: var(--font-mono); color: var(--muted-foreground); text-transform: uppercase; letter-spacing: 0.1em; }
+    .conversion-ratio { font-size: clamp(2rem, 8vw, 3.5rem); font-weight: 700; font-family: var(--font-mono); line-height: 1; }
+    .conversion-sentence { font-size: clamp(0.75rem, 2.5vw, 1.1rem); color: var(--secondary-foreground); line-height: 1.4; }
+    .conversion-prices { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: clamp(0.65rem, 1.8vw, 0.85rem); font-family: var(--font-mono); color: var(--muted-foreground); }
+    .conversion-disclaimer { font-size: clamp(0.55rem, 1.2vw, 0.75rem); color: var(--muted-foreground); display: none; }
+    @media (min-width: 640px) { .conversion-disclaimer { display: block; } }
+
+    .chart-card { padding: clamp(16px, 3vw, 24px); }
+    .chart-title { font-size: clamp(0.6rem, 1.5vw, 0.85rem); font-family: var(--font-mono); color: var(--muted-foreground); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .chart-wrapper { height: clamp(200px, 40vw, 320px); position: relative; }
+
+    footer { border-top: 1px solid var(--border); padding: 16px; margin-top: auto; }
+    footer p { text-align: center; font-size: clamp(0.55rem, 1.5vw, 0.75rem); font-family: var(--font-mono); color: var(--muted-foreground); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div>
+      <h1 class="header-title font-display">
+        <span class="text-gradient">Charizard Home Price Index</span>
+      </h1>
+      <p class="header-subtitle">How many 'Zards does it take to buy a home?</p>
+    </div>
+    <div class="header-source">
+      <div>PriceCharting · TCGPlayer</div>
+      <div class="text-primary">Sample prices</div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="selectors">
+    <div class="selector-group">
+      <label class="selector-label">Median Home Price</label>
+      <div class="selector-wrapper">
+        <select id="assetSelect"></select>
+        <span class="select-arrow">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </div>
+    </div>
+    <div class="selector-group">
+      <label class="selector-label">Valued In Zard</label>
+      <div class="selector-wrapper">
+        <select id="cardSelect"></select>
+        <span class="select-arrow">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="gradient-card glow-primary rounded-xl conversion-card" id="conversionCard">
+    <div class="card-image">
+      <img id="cardImg" src="" alt="" loading="lazy" />
+    </div>
+    <div class="conversion-info">
+      <p class="conversion-label">Current conversion</p>
+      <div class="conversion-ratio text-gradient" id="conversionRatio"></div>
+      <p class="conversion-sentence">
+        <span id="assetName" style="color:var(--foreground);font-weight:600;"></span>
+        <span style="color:var(--secondary-foreground);"> = </span>
+        <span id="ratioSpan" class="text-primary" style="font-weight:600;"></span>
+        <span> </span>
+        <span id="cardNameSpan" class="text-accent" style="font-weight:600;"></span>
+      </p>
+      <div class="conversion-prices">
+        <span>Asset: <span id="assetPrice" style="color:var(--foreground);"></span></span>
+        <span>Card: <span id="cardPrice" style="color:var(--foreground);"></span></span>
+      </div>
+      <p class="conversion-disclaimer">Prices sourced from PriceCharting &amp; TCGPlayer references · Sample data</p>
+    </div>
+  </div>
+
+  <div class="gradient-card rounded-xl chart-card">
+    <h3 class="chart-title" id="chartTitle"></h3>
+    <div class="chart-wrapper">
+      <canvas id="priceChart"></canvas>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <p>Sample/historical estimates · Not financial advice · Built for fun</p>
+</footer>
+
+<script>
+const assets = [
+  { id: "median-home-singapore", label: "Median Home Price (Singapore)", category: "Real Estate", currentValue: 1200000, historicalValues: [
+    {date:"2019-01",value:850000},{date:"2019-06",value:860000},{date:"2020-01",value:870000},{date:"2020-06",value:880000},
+    {date:"2021-01",value:920000},{date:"2021-06",value:970000},{date:"2022-01",value:1020000},{date:"2022-06",value:1080000},
+    {date:"2023-01",value:1100000},{date:"2023-06",value:1120000},{date:"2024-01",value:1140000},{date:"2024-06",value:1170000},{date:"2025-01",value:1200000}
+  ]},
+  { id: "median-home-nyc", label: "Median Home Price (New York)", category: "Real Estate", currentValue: 780000, historicalValues: [
+    {date:"2019-01",value:560000},{date:"2019-06",value:570000},{date:"2020-01",value:575000},{date:"2020-06",value:560000},
+    {date:"2021-01",value:600000},{date:"2021-06",value:650000},{date:"2022-01",value:680000},{date:"2022-06",value:720000},
+    {date:"2023-01",value:710000},{date:"2023-06",value:730000},{date:"2024-01",value:740000},{date:"2024-06",value:760000},{date:"2025-01",value:780000}
+  ]},
+  { id: "median-home-london", label: "Median Home Price (London)", category: "Real Estate", currentValue: 650000, historicalValues: [
+    {date:"2019-01",value:600000},{date:"2019-06",value:605000},{date:"2020-01",value:590000},{date:"2020-06",value:580000},
+    {date:"2021-01",value:600000},{date:"2021-06",value:620000},{date:"2022-01",value:640000},{date:"2022-06",value:660000},
+    {date:"2023-01",value:640000},{date:"2023-06",value:635000},{date:"2024-01",value:630000},{date:"2024-06",value:640000},{date:"2025-01",value:650000}
+  ]},
+  { id: "median-home-tokyo", label: "Median Home Price (Tokyo)", category: "Real Estate", currentValue: 450000, historicalValues: [
+    {date:"2019-01",value:330000},{date:"2019-06",value:335000},{date:"2020-01",value:340000},{date:"2020-06",value:345000},
+    {date:"2021-01",value:355000},{date:"2021-06",value:365000},{date:"2022-01",value:375000},{date:"2022-06",value:390000},
+    {date:"2023-01",value:400000},{date:"2023-06",value:410000},{date:"2024-01",value:420000},{date:"2024-06",value:435000},{date:"2025-01",value:450000}
+  ]}
+];
+
+const pokemonCards = [
+  { id: "base-charizard-1st-psa10", name: "Charizard", label: "1st Ed. Base Set Charizard PSA 10", currentPrice: 420000,
+    image: "https://images.pokemontcg.io/base1/4_hires.png", historicalPrices: [
+    {date:"2019-01",price:55000},{date:"2019-06",price:60000},{date:"2020-01",price:80000},{date:"2020-06",price:130000},
+    {date:"2021-01",price:350000},{date:"2021-06",price:420000},{date:"2022-01",price:400000},{date:"2022-06",price:380000},
+    {date:"2023-01",price:340000},{date:"2023-06",price:360000},{date:"2024-01",price:400000},{date:"2024-06",price:410000},{date:"2025-01",price:420000}
+  ]},
+  { id: "base-charizard-1st-ungraded", name: "Charizard", label: "1st Ed. Base Set Charizard Ungraded", currentPrice: 10000,
+    image: "https://images.pokemontcg.io/base1/4_hires.png", historicalPrices: [
+    {date:"2019-01",price:1500},{date:"2019-06",price:1800},{date:"2020-01",price:3000},{date:"2020-06",price:5000},
+    {date:"2021-01",price:12000},{date:"2021-06",price:15000},{date:"2022-01",price:13000},{date:"2022-06",price:11000},
+    {date:"2023-01",price:9000},{date:"2023-06",price:9500},{date:"2024-01",price:9800},{date:"2024-06",price:10000},{date:"2025-01",price:10000}
+  ]},
+  { id: "base-charizard-unlimited-psa10", name: "Charizard", label: "Unlimited Base Set Charizard PSA 10", currentPrice: 7500,
+    image: "https://storage.googleapis.com/images.pricecharting.com/v26m3g4sjpch7yry/240.jpg", historicalPrices: [
+    {date:"2019-01",price:1200},{date:"2019-06",price:1400},{date:"2020-01",price:2000},{date:"2020-06",price:3500},
+    {date:"2021-01",price:8000},{date:"2021-06",price:9000},{date:"2022-01",price:8500},{date:"2022-06",price:7000},
+    {date:"2023-01",price:6000},{date:"2023-06",price:6500},{date:"2024-01",price:7000},{date:"2024-06",price:7200},{date:"2025-01",price:7500}
+  ]},
+  { id: "base-charizard-unlimited-ungraded", name: "Charizard", label: "Unlimited Base Set Charizard Ungraded", currentPrice: 350,
+    image: "https://storage.googleapis.com/images.pricecharting.com/v26m3g4sjpch7yry/240.jpg", historicalPrices: [
+    {date:"2019-01",price:150},{date:"2019-06",price:160},{date:"2020-01",price:200},{date:"2020-06",price:300},
+    {date:"2021-01",price:450},{date:"2021-06",price:400},{date:"2022-01",price:350},{date:"2022-06",price:320},
+    {date:"2023-01",price:300},{date:"2023-06",price:310},{date:"2024-01",price:330},{date:"2024-06",price:340},{date:"2025-01",price:350}
+  ]}
+];
+
+const assetSelect = document.getElementById("assetSelect");
+const grouped = assets.reduce((acc, a) => { (acc[a.category] = acc[a.category] || []).push(a); return acc; }, {});
+Object.entries(grouped).forEach(([cat, items]) => {
+  const og = document.createElement("optgroup");
+  og.label = cat;
+  items.forEach(a => { const o = document.createElement("option"); o.value = a.id; o.textContent = a.label.replace("Median Home Price (", "").replace(")", ""); og.appendChild(o); });
+  assetSelect.appendChild(og);
+});
+
+const cardSelect = document.getElementById("cardSelect");
+pokemonCards.forEach(c => {
+  const o = document.createElement("option");
+  o.value = c.id;
+  o.textContent = `${c.label} — $${c.currentPrice.toLocaleString()}`;
+  cardSelect.appendChild(o);
+});
+
+assetSelect.value = "median-home-singapore";
+cardSelect.value = "base-charizard-1st-psa10";
+
+let chartInstance = null;
+function fmt(v) { return v < 1 ? v.toFixed(4) : v.toFixed(2); }
+
+function update() {
+  const asset = assets.find(a => a.id === assetSelect.value);
+  const card = pokemonCards.find(c => c.id === cardSelect.value);
+  const ratio = asset.currentValue / card.currentPrice;
+  const formatted = fmt(ratio);
+
+  document.getElementById("cardImg").src = card.image;
+  document.getElementById("cardImg").alt = card.label;
+  document.getElementById("conversionRatio").textContent = formatted;
+  document.getElementById("assetName").textContent = asset.label;
+  document.getElementById("ratioSpan").textContent = formatted;
+  document.getElementById("cardNameSpan").textContent = card.name + "s";
+  document.getElementById("assetPrice").textContent = "$" + asset.currentValue.toLocaleString();
+  document.getElementById("cardPrice").textContent = "$" + card.currentPrice.toLocaleString();
+  document.getElementById("chartTitle").textContent = `${asset.label} in ${card.name}s`;
+
+  const assetMap = new Map(asset.historicalValues.map(v => [v.date, v.value]));
+  const cardMap = new Map(card.historicalPrices.map(v => [v.date, v.price]));
+  const allDates = [...new Set([...assetMap.keys(), ...cardMap.keys()])].sort();
+  const chartData = allDates.filter(d => assetMap.has(d) && cardMap.has(d)).map(d => ({
+    x: d.replace("-", " "), y: assetMap.get(d) / cardMap.get(d)
+  }));
+
+  const ctx = document.getElementById("priceChart").getContext("2d");
+  if (chartInstance) chartInstance.destroy();
+
+  const gradient = ctx.createLinearGradient(0, 0, 0, 320);
+  gradient.addColorStop(0, "hsla(25, 95%, 55%, 0.4)");
+  gradient.addColorStop(1, "hsla(25, 95%, 55%, 0)");
+
+  chartInstance = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: chartData.map(d => d.x),
+      datasets: [{
+        data: chartData.map(d => d.y),
+        borderColor: "hsl(25, 95%, 55%)",
+        borderWidth: 2,
+        fill: true,
+        backgroundColor: gradient,
+        pointRadius: 3,
+        pointBackgroundColor: "hsl(25, 95%, 55%)",
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: "hsl(225, 15%, 12%)",
+          borderColor: "hsl(225, 12%, 20%)",
+          borderWidth: 1,
+          titleFont: { family: "JetBrains Mono", size: 11 },
+          bodyFont: { family: "JetBrains Mono", size: 11 },
+          titleColor: "hsl(40, 20%, 92%)",
+          bodyColor: "hsl(40, 20%, 92%)",
+          padding: 8,
+          callbacks: { label: ctx => `${fmt(ctx.raw)} cards` }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: "hsl(225, 10%, 50%)", font: { family: "JetBrains Mono", size: 9 }, maxRotation: 45, minRotation: 45 },
+          grid: { color: "hsl(225, 12%, 20%)" },
+          border: { color: "hsl(225, 12%, 20%)" }
+        },
+        y: {
+          ticks: { color: "hsl(225, 10%, 50%)", font: { family: "JetBrains Mono", size: 9 }, callback: v => v < 1 ? v.toFixed(2) : v.toFixed(0) },
+          grid: { color: "hsl(225, 12%, 20%)" },
+          border: { color: "hsl(225, 12%, 20%)" }
+        }
+      }
+    }
+  });
+}
+
+assetSelect.addEventListener("change", update);
+cardSelect.addEventListener("change", update);
+update();
+</script>
+</body>
+</html>
