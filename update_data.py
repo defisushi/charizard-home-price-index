@@ -22,7 +22,22 @@ def today():
     d = datetime.date.today()
     return f"{d.year}-{d.month:02d}"
 
-# Charizard prices via PriceCharting
+def get_fx_rate(from_currency):
+    """Fetch live FX rate to USD using open.er-api.com (free, no key needed)"""
+    try:
+        url = f"https://open.er-api.com/v6/latest/{from_currency}"
+        data = fetch(url)
+        import json
+        rates = json.loads(data)
+        return rates["rates"]["USD"]
+    except Exception as e:
+        print(f"  [warn] FX rate {from_currency}/USD failed: {e}")
+        # Fallback rates as of March 2026
+        fallbacks = {"SGD": 0.787, "GBP": 1.348, "JPY": 0.00638, "USD": 1.0}
+        return fallbacks.get(from_currency, 1.0)
+
+# ── Charizard prices via PriceCharting ─────────────────────────────────────
+
 PRICECHARTING_CARDS = {
     "base-charizard-1st-psa10": {
         "url": "https://www.pricecharting.com/game/pokemon-base-set-1st-edition/charizard-4",
@@ -53,18 +68,41 @@ def fetch_card_price(card_id):
         soup = BeautifulSoup(html, "html.parser")
         el = soup.select_one(info["selector"])
         if el:
-            raw = el.get_text(strip=True).replace("$", "").replace(",", "")
-            return float(raw)
+            raw = el.get_text(strip=True).replace("$", "").replace(",", "").strip()
+            val = float(raw)
+            if val > 0:
+                return val
     except Exception as e:
         print(f"  [warn] {card_id}: {e}")
     return info["fallback"]
 
-# Home prices via Numbeo
+# ── Home prices via Numbeo + live FX to USD ─────────────────────────────────
+
 NUMBEO_CITIES = {
-    "median-home-singapore": {"city": "Singapore",  "fallback": 1200000},
-    "median-home-nyc":       {"city": "New-York",   "fallback": 780000},
-    "median-home-london":    {"city": "London",     "fallback": 650000},
-    "median-home-tokyo":     {"city": "Tokyo",      "fallback": 450000},
+    "median-home-singapore": {
+        "city": "Singapore",
+        "currency": "SGD",   # Numbeo returns SGD
+        "sqm": 85,           # assumed median apartment size
+        "fallback": 1200000
+    },
+    "median-home-nyc": {
+        "city": "New-York",
+        "currency": "USD",
+        "sqm": 85,
+        "fallback": 780000
+    },
+    "median-home-london": {
+        "city": "London",
+        "currency": "GBP",   # Numbeo returns GBP
+        "sqm": 85,
+        "fallback": 650000
+    },
+    "median-home-tokyo": {
+        "city": "Tokyo",
+        "currency": "JPY",   # Numbeo returns JPY
+        "sqm": 70,           # Tokyo apartments typically smaller
+        "fallback": 450000
+    },
 }
 
 def fetch_home_price(asset_id):
@@ -76,13 +114,33 @@ def fetch_home_price(asset_id):
         rows = soup.select("table.data_wide_table tr")
         for row in rows:
             cells = row.find_all("td")
-            if len(cells) >= 2 and "City Centre" in cells[0].get_text():
-                raw = cells[1].get_text(strip=True).replace(",", "").replace("$", "").split()[0]
-                price_per_sqm = float(raw)
-                return round(price_per_sqm * 85)  # assume 85 sqm median apartment
+            if len(cells) >= 2 and "City Centre" in cells[0].get_text() and "Buy" in cells[0].get_text():
+                # Get the first (lower bound) value
+                raw = cells[1].get_text(strip=True)
+                # Numbeo shows a range like "15,000-25,000" — take midpoint
+                raw = raw.replace(",", "").split()[0]
+                if "-" in raw:
+                    parts = raw.split("-")
+                    price_per_sqm = (float(parts[0]) + float(parts[1])) / 2
+                else:
+                    price_per_sqm = float(raw)
+
+                local_price = price_per_sqm * info["sqm"]
+
+                # Convert to USD
+                if info["currency"] != "USD":
+                    fx = get_fx_rate(info["currency"])
+                    usd_price = local_price * fx
+                    print(f"    [{info['currency']}→USD @ {fx:.4f}] {local_price:,.0f} {info['currency']} = ${usd_price:,.0f}")
+                else:
+                    usd_price = local_price
+
+                return round(usd_price)
     except Exception as e:
         print(f"  [warn] {asset_id}: {e}")
     return info["fallback"]
+
+# ── Update index.html ───────────────────────────────────────────────────────
 
 def update_html(card_prices, home_prices):
     with open("index.html", "r", encoding="utf-8") as f:
@@ -122,6 +180,8 @@ def update_html(card_prices, home_prices):
         f.write(html)
     print(f"index.html updated for {date}")
 
+# ── Main ────────────────────────────────────────────────────────────────────
+
 if __name__ == "__main__":
     print("Fetching Charizard prices...")
     card_prices = {}
@@ -130,12 +190,12 @@ if __name__ == "__main__":
         card_prices[card_id] = p
         print(f"  {card_id}: ${p:,.0f}")
 
-    print("Fetching home prices...")
+    print("Fetching home prices (converting to USD)...")
     home_prices = {}
     for asset_id in NUMBEO_CITIES:
         v = fetch_home_price(asset_id)
         home_prices[asset_id] = v
-        print(f"  {asset_id}: ${v:,.0f}")
+        print(f"  {asset_id}: ${v:,.0f} USD")
 
     update_html(card_prices, home_prices)
     print("Done!")
