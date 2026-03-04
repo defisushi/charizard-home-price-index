@@ -29,6 +29,7 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; border-color: var(--border); }
     body { background: var(--background); color: var(--foreground); font-family: var(--font-display); min-height: 100vh; display: flex; flex-direction: column; }
 
+    /* Utilities */
     .font-mono { font-family: var(--font-mono); }
     .font-display { font-family: var(--font-display); }
     .text-muted { color: var(--muted-foreground); }
@@ -46,6 +47,7 @@
     .glow-primary { box-shadow: 0 0 30px -5px hsl(25, 95%, 55%, 0.3); }
     .rounded-xl { border-radius: var(--radius); }
 
+    /* Header */
     header {
       border-bottom: 1px solid var(--border);
       position: sticky; top: 0; z-index: 10;
@@ -61,8 +63,10 @@
     .header-subtitle { font-size: clamp(0.6rem, 2vw, 0.85rem); color: var(--muted-foreground); font-family: var(--font-mono); margin-top: 2px; }
     .header-source { font-size: clamp(0.55rem, 1.5vw, 0.75rem); font-family: var(--font-mono); color: var(--muted-foreground); text-align: right; }
 
+    /* Main */
     main { flex: 1; padding: 20px 16px; max-width: 960px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 20px; }
 
+    /* Selectors */
     .selectors { display: grid; grid-template-columns: 1fr; gap: 12px; }
     @media (min-width: 640px) { .selectors { grid-template-columns: 1fr 1fr; } }
     .selector-group { display: flex; flex-direction: column; gap: 8px; }
@@ -84,6 +88,7 @@
     optgroup { background: var(--popover); color: var(--muted-foreground); font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; }
     option { background: var(--popover); color: var(--foreground); font-family: var(--font-display); font-size: 0.95rem; }
 
+    /* Conversion Card */
     .conversion-card { padding: clamp(16px, 3vw, 32px); display: flex; align-items: flex-start; gap: 16px; }
     @media (min-width: 640px) { .conversion-card { align-items: center; gap: 40px; } }
     .card-image { flex-shrink: 0; }
@@ -96,10 +101,12 @@
     .conversion-disclaimer { font-size: clamp(0.55rem, 1.2vw, 0.75rem); color: var(--muted-foreground); display: none; }
     @media (min-width: 640px) { .conversion-disclaimer { display: block; } }
 
+    /* Chart */
     .chart-card { padding: clamp(16px, 3vw, 24px); }
     .chart-title { font-size: clamp(0.6rem, 1.5vw, 0.85rem); font-family: var(--font-mono); color: var(--muted-foreground); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .chart-wrapper { height: clamp(200px, 40vw, 320px); position: relative; }
 
+    /* Footer */
     footer { border-top: 1px solid var(--border); padding: 16px; margin-top: auto; }
     footer p { text-align: center; font-size: clamp(0.55rem, 1.5vw, 0.75rem); font-family: var(--font-mono); color: var(--muted-foreground); }
   </style>
@@ -114,17 +121,15 @@
       </h1>
       <p class="header-subtitle">How many 'Zards does it take to buy a home?</p>
     </div>
-    <div class="header-source">
-      <div>PriceCharting · Numbeo</div>
-      <div class="text-primary">Updated weekly</div>
-    </div>
+
   </div>
 </header>
 
 <main>
+  <!-- Selectors -->
   <div class="selectors">
     <div class="selector-group">
-      <label class="selector-label">Median Home Price</label>
+      <label class="selector-label">SG Median Home Price</label>
       <div class="selector-wrapper">
         <select id="assetSelect"></select>
         <span class="select-arrow">
@@ -143,28 +148,55 @@
     </div>
   </div>
 
-  <div class="gradient-card glow-primary rounded-xl conversion-card" id="conversionCard">
-    <div class="card-image">
-      <img id="cardImg" src="" alt="" loading="lazy" />
+  <!-- Conversion Display -->
+  <div class="gradient-card glow-primary rounded-xl" id="conversionCard" style="display:flex;align-items:center;gap:clamp(16px,4vw,48px);padding:clamp(16px,3vw,36px);">
+
+    <!-- Card image -->
+    <div style="flex-shrink:0;align-self:stretch;display:flex;align-items:stretch;">
+      <img id="cardImg" src="" alt="" loading="lazy"
+           style="height:100%;width:auto;max-width:clamp(100px,20vw,180px);object-fit:contain;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,0.5);display:block;" />
     </div>
-    <div class="conversion-info">
-      <p class="conversion-label">Current conversion</p>
-      <div class="conversion-ratio text-gradient" id="conversionRatio"></div>
-      <p class="conversion-sentence">
-        <span id="assetName" style="color:var(--foreground);font-weight:600;"></span>
-        <span style="color:var(--secondary-foreground);"> = </span>
-        <span id="ratioSpan" class="text-primary" style="font-weight:600;"></span>
-        <span> </span>
-        <span id="cardNameSpan" class="text-accent" style="font-weight:600;"></span>
+
+    <!-- Info -->
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:0;">
+
+      <!-- Row 1: what you're buying -->
+      <p style="font-size:clamp(0.75rem,2vw,1rem);color:var(--foreground);font-weight:600;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.08em;margin:0 0 6px;">
+        <span id="assetName"></span>
       </p>
-      <div class="conversion-prices">
-        <span>Asset: <span id="assetPrice" style="color:var(--foreground);"></span></span>
-        <span>Card: <span id="cardPrice" style="color:var(--foreground);"></span></span>
+
+      <!-- Divider -->
+      <div style="height:1px;background:var(--border);margin-bottom:12px;"></div>
+
+      <!-- Row 2: the big "= X Charizards" -->
+      <p style="font-size:clamp(0.8rem,2vw,1rem);color:var(--muted-foreground);font-family:var(--font-mono);margin:0 0 4px;">equals</p>
+      <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:4px;">
+        <span id="conversionRatio" class="text-gradient" style="font-size:clamp(2.5rem,9vw,4rem);font-weight:700;font-family:var(--font-mono);line-height:1;"></span>
+        <span style="font-size:clamp(1rem,3vw,1.5rem);font-weight:600;color:var(--foreground);font-family:var(--font-display);">Charizards</span>
       </div>
-      <p class="conversion-disclaimer">Prices sourced from PriceCharting & Numbeo · Updated weekly</p>
+
+      <!-- Row 3: card grade -->
+      <p id="cardGrade" style="font-size:clamp(0.65rem,1.5vw,0.8rem);color:var(--muted-foreground);font-family:var(--font-mono);margin:0 0 14px;"></p>
+
+      <!-- Divider -->
+      <div style="height:1px;background:var(--border);margin-bottom:12px;"></div>
+
+      <!-- Row 4: prices -->
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 16px;font-size:clamp(0.7rem,1.6vw,0.82rem);font-family:var(--font-mono);">
+        <span style="color:var(--muted-foreground);">Home</span>
+        <span id="assetPrice" style="color:var(--foreground);font-weight:500;"></span>
+        <span style="color:var(--muted-foreground);">Card</span>
+        <span id="cardPrice" style="color:var(--foreground);font-weight:500;"></span>
+      </div>
+
+    </div>
+  </div>
+      <!-- Home / Card prices -->
+
     </div>
   </div>
 
+  <!-- Chart -->
   <div class="gradient-card rounded-xl chart-card">
     <h3 class="chart-title" id="chartTitle"></h3>
     <div class="chart-wrapper">
@@ -174,81 +206,75 @@
 </main>
 
 <footer>
-  <p>Historical estimates · Not financial advice · Built for fun</p>
+  <p>Historical estimates · Prices in SGD · Not financial advice · Built for fun</p>
 </footer>
 
 <script>
 const assets = [
-  { id: "median-home-singapore", label: "Median Home Price (Singapore)", category: "Real Estate", currentValue: 1518311, historicalValues: [
-    {date:"2019-01",value:850000},{date:"2019-06",value:860000},{date:"2020-01",value:870000},{date:"2020-06",value:880000},
-    {date:"2021-01",value:920000},{date:"2021-06",value:970000},{date:"2022-01",value:1020000},{date:"2022-06",value:1080000},
-    {date:"2023-01",value:1100000},{date:"2023-06",value:1120000},{date:"2024-01",value:1140000},{date:"2024-06",value:1170000},{date:"2025-01",value:1200000},
-    {date:"2026-03",value:293848}]},
-  { id: "median-home-nyc", label: "Median Home Price (New York)", category: "Real Estate", currentValue: 704008, historicalValues: [
-    {date:"2019-01",value:560000},{date:"2019-06",value:570000},{date:"2020-01",value:575000},{date:"2020-06",value:560000},
-    {date:"2021-01",value:600000},{date:"2021-06",value:650000},{date:"2022-01",value:680000},{date:"2022-06",value:720000},
-    {date:"2023-01",value:710000},{date:"2023-06",value:730000},{date:"2024-01",value:740000},{date:"2024-06",value:760000},{date:"2025-01",value:780000},
-    {date:"2026-03",value:379829}]},
-  { id: "median-home-london", label: "Median Home Price (London)", category: "Real Estate", currentValue: 750485, historicalValues: [
-    {date:"2019-01",value:600000},{date:"2019-06",value:605000},{date:"2020-01",value:590000},{date:"2020-06",value:580000},
-    {date:"2021-01",value:600000},{date:"2021-06",value:620000},{date:"2022-01",value:640000},{date:"2022-06",value:660000},
-    {date:"2023-01",value:640000},{date:"2023-06",value:635000},{date:"2024-01",value:630000},{date:"2024-06",value:640000},{date:"2025-01",value:650000},
-    {date:"2026-03",value:201215}]},
-  { id: "median-home-tokyo", label: "Median Home Price (Tokyo)", category: "Real Estate", currentValue: 290299, historicalValues: [
-    {date:"2019-01",value:330000},{date:"2019-06",value:335000},{date:"2020-01",value:340000},{date:"2020-06",value:345000},
-    {date:"2021-01",value:355000},{date:"2021-06",value:365000},{date:"2022-01",value:375000},{date:"2022-06",value:390000},
-    {date:"2023-01",value:400000},{date:"2023-06",value:410000},{date:"2024-01",value:420000},{date:"2024-06",value:435000},{date:"2025-01",value:450000},
-    {date:"2026-03",value:15347421}]}
+  { id: "sg-hdb", label: "HDB", category: "Singapore", currentValue: 628000, historicalValues: [
+    {date:"2025-01",value:628000}
+  ]},
+  { id: "sg-condo", label: "Condo", category: "Singapore", currentValue: 1875000, historicalValues: [
+    {date:"2025-01",value:1875000}
+  ]},
+  { id: "sg-landed", label: "Landed", category: "Singapore", currentValue: 4650000, historicalValues: [
+    {date:"2025-01",value:4650000}
+  ]}
 ];
 
 const pokemonCards = [
-  { id: "base-charizard-1st-psa10", name: "Charizard", label: "1st Ed. Base Set Charizard PSA 10", currentPrice: 168544,
+  { id: "base-charizard-1st-psa10", name: "Charizard", label: "1st Ed. Base Set Charizard PSA 10", currentPrice: 532319,
     image: "https://images.pokemontcg.io/base1/4_hires.png", historicalPrices: [
     {date:"2019-01",price:55000},{date:"2019-06",price:60000},{date:"2020-01",price:80000},{date:"2020-06",price:130000},
     {date:"2021-01",price:350000},{date:"2021-06",price:420000},{date:"2022-01",price:400000},{date:"2022-06",price:380000},
-    {date:"2023-01",price:340000},{date:"2023-06",price:360000},{date:"2024-01",price:400000},{date:"2024-06",price:410000},{date:"2025-01",price:420000},
-    {date:"2026-03",price:420000}]},
-  { id: "base-charizard-1st-ungraded", name: "Charizard", label: "1st Ed. Base Set Charizard Ungraded", currentPrice: 5364,
+    {date:"2023-01",price:340000},{date:"2023-06",price:360000},{date:"2024-01",price:400000},{date:"2024-06",price:410000},{date:"2025-01",price:420000}
+  ]},
+  { id: "base-charizard-1st-ungraded", name: "Charizard", label: "1st Ed. Base Set Charizard Ungraded", currentPrice: 12674,
     image: "https://images.pokemontcg.io/base1/4_hires.png", historicalPrices: [
     {date:"2019-01",price:1500},{date:"2019-06",price:1800},{date:"2020-01",price:3000},{date:"2020-06",price:5000},
     {date:"2021-01",price:12000},{date:"2021-06",price:15000},{date:"2022-01",price:13000},{date:"2022-06",price:11000},
-    {date:"2023-01",price:9000},{date:"2023-06",price:9500},{date:"2024-01",price:9800},{date:"2024-06",price:10000},{date:"2025-01",price:10000},
-    {date:"2026-03",price:10000}]},
-  { id: "base-charizard-unlimited-psa10", name: "Charizard", label: "Unlimited Base Set Charizard PSA 10", currentPrice: 16358,
+    {date:"2023-01",price:9000},{date:"2023-06",price:9500},{date:"2024-01",price:9800},{date:"2024-06",price:10000},{date:"2025-01",price:10000}
+  ]},
+  { id: "base-charizard-unlimited-psa10", name: "Charizard", label: "Unlimited Base Set Charizard PSA 10", currentPrice: 9506,
     image: "https://storage.googleapis.com/images.pricecharting.com/v26m3g4sjpch7yry/240.jpg", historicalPrices: [
     {date:"2019-01",price:1200},{date:"2019-06",price:1400},{date:"2020-01",price:2000},{date:"2020-06",price:3500},
     {date:"2021-01",price:8000},{date:"2021-06",price:9000},{date:"2022-01",price:8500},{date:"2022-06",price:7000},
-    {date:"2023-01",price:6000},{date:"2023-06",price:6500},{date:"2024-01",price:7000},{date:"2024-06",price:7200},{date:"2025-01",price:7500},
-    {date:"2026-03",price:316}]},
-  { id: "base-charizard-unlimited-ungraded", name: "Charizard", label: "Unlimited Base Set Charizard Ungraded", currentPrice: 316,
+    {date:"2023-01",price:6000},{date:"2023-06",price:6500},{date:"2024-01",price:7000},{date:"2024-06",price:7200},{date:"2025-01",price:7500}
+  ]},
+  { id: "base-charizard-unlimited-ungraded", name: "Charizard", label: "Unlimited Base Set Charizard Ungraded", currentPrice: 444,
     image: "https://storage.googleapis.com/images.pricecharting.com/v26m3g4sjpch7yry/240.jpg", historicalPrices: [
     {date:"2019-01",price:150},{date:"2019-06",price:160},{date:"2020-01",price:200},{date:"2020-06",price:300},
     {date:"2021-01",price:450},{date:"2021-06",price:400},{date:"2022-01",price:350},{date:"2022-06",price:320},
-    {date:"2023-01",price:300},{date:"2023-06",price:310},{date:"2024-01",price:330},{date:"2024-06",price:340},{date:"2025-01",price:350},
-    {date:"2026-03",price:629}]}
+    {date:"2023-01",price:300},{date:"2023-06",price:310},{date:"2024-01",price:330},{date:"2024-06",price:340},{date:"2025-01",price:350}
+  ]}
 ];
 
+// Populate asset select (grouped)
 const assetSelect = document.getElementById("assetSelect");
 const grouped = assets.reduce((acc, a) => { (acc[a.category] = acc[a.category] || []).push(a); return acc; }, {});
 Object.entries(grouped).forEach(([cat, items]) => {
   const og = document.createElement("optgroup");
   og.label = cat;
-  items.forEach(a => { const o = document.createElement("option"); o.value = a.id; o.textContent = a.label.replace("Median Home Price (", "").replace(")", ""); og.appendChild(o); });
+  items.forEach(a => { const o = document.createElement("option"); o.value = a.id; o.textContent = a.label; og.appendChild(o); });
   assetSelect.appendChild(og);
 });
 
+// Populate card select
 const cardSelect = document.getElementById("cardSelect");
 pokemonCards.forEach(c => {
   const o = document.createElement("option");
   o.value = c.id;
-  o.textContent = `${c.label} — $${c.currentPrice.toLocaleString()}`;
+  const shortLabel = c.label.replace("1st Ed. Base Set Charizard", "1st Ed. Base Set").replace("Unlimited Base Set Charizard", "Unlimited Base Set");
+  o.textContent = `${shortLabel} (SGD ${c.currentPrice.toLocaleString()})`;
   cardSelect.appendChild(o);
 });
 
-assetSelect.value = "median-home-singapore";
+assetSelect.value = "sg-hdb";
 cardSelect.value = "base-charizard-1st-psa10";
 
+// Chart
 let chartInstance = null;
+
 function fmt(v) { return v < 1 ? v.toFixed(4) : v.toFixed(2); }
 
 function update() {
@@ -260,13 +286,17 @@ function update() {
   document.getElementById("cardImg").src = card.image;
   document.getElementById("cardImg").alt = card.label;
   document.getElementById("conversionRatio").textContent = formatted;
-  document.getElementById("assetName").textContent = asset.label;
-  document.getElementById("ratioSpan").textContent = formatted;
-  document.getElementById("cardNameSpan").textContent = card.name + "s";
-  document.getElementById("assetPrice").textContent = "$" + asset.currentValue.toLocaleString();
-  document.getElementById("cardPrice").textContent = "$" + card.currentPrice.toLocaleString();
-  document.getElementById("chartTitle").textContent = `${asset.label} in ${card.name}s`;
+  document.getElementById("assetName").textContent = "1 " + asset.label + " (median)";
+  const gradeLabel = card.id.includes("1st") && card.id.includes("psa10") ? "1st Ed Base Set · PSA 10"
+    : card.id.includes("1st") && card.id.includes("ungraded") ? "1st Ed Base Set · Ungraded"
+    : card.id.includes("unlimited") && card.id.includes("psa10") ? "Unlimited Base Set · PSA 10"
+    : "Unlimited Base Set · Ungraded";
+  document.getElementById("cardGrade").textContent = gradeLabel;
+  document.getElementById("assetPrice").textContent = "SGD " + asset.currentValue.toLocaleString();
+  document.getElementById("cardPrice").textContent = "SGD " + card.currentPrice.toLocaleString();
+  document.getElementById("chartTitle").textContent = `Median ${asset.label} in Charizards`;
 
+  // Build chart data
   const assetMap = new Map(asset.historicalValues.map(v => [v.date, v.value]));
   const cardMap = new Map(card.historicalPrices.map(v => [v.date, v.price]));
   const allDates = [...new Set([...assetMap.keys(), ...cardMap.keys()])].sort();
@@ -309,7 +339,9 @@ function update() {
           titleColor: "hsl(40, 20%, 92%)",
           bodyColor: "hsl(40, 20%, 92%)",
           padding: 8,
-          callbacks: { label: ctx => `${fmt(ctx.raw)} cards` }
+          callbacks: {
+            label: ctx => `${fmt(ctx.raw)} cards`
+          }
         }
       },
       scales: {
