@@ -55,37 +55,64 @@
     }
     .header-inner {
       padding: 12px 16px;
-      max-width: 640px; margin: 0 auto;
+      max-width: 760px; margin: 0 auto;
       display: flex; align-items: center; justify-content: space-between;
     }
-    .header-title { font-size: clamp(1.2rem, 4vw, 1.9rem); font-weight: 700; }
-    .header-subtitle { font-size: clamp(0.6rem, 2vw, 0.85rem); color: var(--muted-foreground); font-family: var(--font-mono); margin-top: 2px; }
-    .header-source { font-size: clamp(0.55rem, 1.5vw, 0.75rem); font-family: var(--font-mono); color: var(--muted-foreground); text-align: right; }
+    .header-title { font-size: clamp(1.5rem, 5vw, 2.2rem); font-weight: 700; }
+    .header-subtitle { font-size: clamp(0.8rem, 2.5vw, 1rem); color: var(--muted-foreground); font-family: var(--font-mono); margin-top: 2px; }
 
     /* Main */
-    main { flex: 1; padding: 20px 16px; max-width: 640px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 20px; }
+    main { flex: 1; padding: 20px 16px; max-width: 760px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 20px; }
 
     /* Selectors */
     .selectors { display: grid; grid-template-columns: 1fr; gap: 12px; }
     @media (min-width: 640px) { .selectors { grid-template-columns: auto auto; } }
     .selector-group { display: flex; flex-direction: column; gap: 8px; }
     .selector-label { font-size: 0.75rem; font-family: var(--font-mono); color: var(--muted-foreground); text-transform: uppercase; letter-spacing: 0.1em; }
-    .selector-wrapper { position: relative; }
-    select {
+
+    /* Custom Dropdown */
+    .custom-select { position: relative; }
+    .custom-select-trigger {
       width: 100%; height: 48px; padding: 0 40px 0 14px;
       background: var(--secondary); border: 1px solid var(--border);
       color: var(--foreground); font-size: clamp(0.85rem, 2.5vw, 1.1rem);
       font-family: var(--font-display); border-radius: var(--radius);
-      appearance: none; cursor: pointer; outline: none;
-      transition: border-color 0.2s;
+      cursor: pointer; outline: none; transition: border-color 0.2s;
+      display: flex; align-items: center;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      user-select: none; -webkit-user-select: none;
     }
-    select:focus { border-color: var(--primary); }
-    .select-arrow {
+    .custom-select-trigger:hover { border-color: hsl(225, 12%, 30%); }
+    .custom-select.open .custom-select-trigger { border-color: var(--primary); }
+    .custom-select-arrow {
       position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
       pointer-events: none; color: var(--muted-foreground);
+      transition: transform 0.2s;
     }
-    optgroup { background: var(--popover); color: var(--muted-foreground); font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; }
-    option { background: var(--popover); color: var(--foreground); font-family: var(--font-display); font-size: 0.95rem; }
+    .custom-select.open .custom-select-arrow { transform: translateY(-50%) rotate(180deg); }
+    .custom-select-dropdown {
+      display: none;
+      position: absolute; top: 100%; left: 0; right: 0;
+      margin-top: 4px;
+      background: var(--popover); border: 1px solid var(--border);
+      border-radius: var(--radius);
+      max-height: 240px; overflow-y: auto;
+      z-index: 50;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+    .custom-select.open .custom-select-dropdown { display: block; }
+    .custom-select-option {
+      padding: 10px 14px;
+      color: var(--foreground); font-family: var(--font-display); font-size: 0.95rem;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .custom-select-option:hover { background: var(--secondary); }
+    .custom-select-option.selected { color: var(--primary); }
+
+    /* Scrollbar for dropdown */
+    .custom-select-dropdown::-webkit-scrollbar { width: 6px; }
+    .custom-select-dropdown::-webkit-scrollbar-track { background: transparent; }
+    .custom-select-dropdown::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
     /* Conversion Card */
     .conversion-card { padding: clamp(16px, 3vw, 32px); display: flex; align-items: flex-start; gap: 16px; }
@@ -115,7 +142,6 @@
       </h1>
       <p class="header-subtitle">How many 'Zards does it take to buy a home?</p>
     </div>
-
   </div>
 </header>
 
@@ -124,20 +150,22 @@
   <div class="selectors">
     <div class="selector-group">
       <label class="selector-label">SG Median Home Price</label>
-      <div class="selector-wrapper">
-        <select id="assetSelect"></select>
-        <span class="select-arrow">
+      <div class="custom-select" id="assetDropdown">
+        <div class="custom-select-trigger" tabindex="0"></div>
+        <span class="custom-select-arrow">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </span>
+        <div class="custom-select-dropdown"></div>
       </div>
     </div>
     <div class="selector-group">
       <label class="selector-label">Valued In Zard</label>
-      <div class="selector-wrapper">
-        <select id="cardSelect"></select>
-        <span class="select-arrow">
+      <div class="custom-select" id="cardDropdown">
+        <div class="custom-select-trigger" tabindex="0"></div>
+        <span class="custom-select-arrow">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </span>
+        <div class="custom-select-dropdown"></div>
       </div>
     </div>
   </div>
@@ -146,9 +174,9 @@
   <div class="gradient-card glow-primary rounded-xl" id="conversionCard" style="display:flex;align-items:center;gap:clamp(16px,4vw,48px);padding:clamp(16px,3vw,36px);">
 
     <!-- Card image -->
-    <div style="flex-shrink:0;align-self:stretch;display:flex;align-items:stretch;">
+    <div style="flex-shrink:0;display:flex;align-items:center;">
       <img id="cardImg" src="" alt="" loading="lazy"
-           style="height:100%;width:auto;max-width:clamp(100px,20vw,180px);object-fit:contain;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,0.5);display:block;" />
+           style="width:clamp(140px,30vw,240px);height:auto;object-fit:contain;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,0.5);display:block;" />
     </div>
 
     <!-- Info -->
@@ -164,7 +192,7 @@
 
       <!-- Row 2: the big "= X Charizards" -->
       <p style="font-size:clamp(0.8rem,2vw,1rem);color:var(--muted-foreground);font-family:var(--font-mono);margin:0 0 4px;">equals</p>
-      <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:4px;">
+      <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:4px;">
         <span id="conversionRatio" class="text-gradient" style="font-size:clamp(2.5rem,9vw,4rem);font-weight:700;font-family:var(--font-mono);line-height:1;"></span>
         <span style="font-size:clamp(1rem,3vw,1.5rem);font-weight:600;color:var(--foreground);font-family:var(--font-display);">Charizards</span>
       </div>
@@ -185,14 +213,10 @@
 
     </div>
   </div>
-      <!-- Home / Card prices -->
-
-    </div>
-  </div>
 </main>
 
 <footer>
-  <p>Historical estimates · Prices in SGD · Not financial advice · Built for fun</p>
+  <p>Historical estimates · Not financial advice · Built for fun</p>
 </footer>
 
 <script>
@@ -235,34 +259,65 @@ const pokemonCards = [
   ]}
 ];
 
-// Populate asset select (grouped)
-const assetSelect = document.getElementById("assetSelect");
-const grouped = assets.reduce((acc, a) => { (acc[a.category] = acc[a.category] || []).push(a); return acc; }, {});
-Object.entries(grouped).forEach(([cat, items]) => {
-  const og = document.createElement("optgroup");
-  og.label = cat;
-  items.forEach(a => { const o = document.createElement("option"); o.value = a.id; o.textContent = a.label; og.appendChild(o); });
-  assetSelect.appendChild(og);
-});
+// Custom dropdown logic
+function initDropdown(containerEl, options, defaultValue, onChange) {
+  const trigger = containerEl.querySelector('.custom-select-trigger');
+  const dropdown = containerEl.querySelector('.custom-select-dropdown');
+  let selectedValue = defaultValue;
 
-// Populate card select
-const cardSelect = document.getElementById("cardSelect");
-pokemonCards.forEach(c => {
-  const o = document.createElement("option");
-  o.value = c.id;
+  // Build options
+  options.forEach(opt => {
+    const div = document.createElement('div');
+    div.className = 'custom-select-option' + (opt.value === defaultValue ? ' selected' : '');
+    div.dataset.value = opt.value;
+    div.textContent = opt.label;
+    div.addEventListener('click', () => {
+      selectedValue = opt.value;
+      trigger.textContent = opt.label;
+      containerEl.querySelectorAll('.custom-select-option').forEach(o => o.classList.remove('selected'));
+      div.classList.add('selected');
+      containerEl.classList.remove('open');
+      onChange(opt.value);
+    });
+    dropdown.appendChild(div);
+  });
+
+  // Set initial label
+  const initial = options.find(o => o.value === defaultValue);
+  if (initial) trigger.textContent = initial.label;
+
+  // Toggle
+  trigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    // Close other dropdowns
+    document.querySelectorAll('.custom-select.open').forEach(el => {
+      if (el !== containerEl) el.classList.remove('open');
+    });
+    containerEl.classList.toggle('open');
+  });
+
+  // Close on outside click
+  document.addEventListener('click', () => containerEl.classList.remove('open'));
+  dropdown.addEventListener('click', (e) => e.stopPropagation());
+
+  return () => selectedValue;
+}
+
+// Build option lists
+const assetOptions = assets.map(a => ({ value: a.id, label: a.label }));
+const cardOptions = pokemonCards.map(c => {
   const shortLabel = c.label.replace("1st Ed. Base Set Charizard", "1st Ed. Base Set").replace("Unlimited Base Set Charizard", "Unlimited Base Set");
-  o.textContent = `${shortLabel} (SGD ${c.currentPrice.toLocaleString()})`;
-  cardSelect.appendChild(o);
+  return { value: c.id, label: `${shortLabel} (SGD ${c.currentPrice.toLocaleString()})` };
 });
 
-assetSelect.value = "sg-hdb";
-cardSelect.value = "base-charizard-1st-psa10";
+let currentAsset = "sg-hdb";
+let currentCard = "base-charizard-1st-psa10";
 
 function fmt(v) { return v < 1 ? v.toFixed(4) : v.toFixed(2); }
 
 function update() {
-  const asset = assets.find(a => a.id === assetSelect.value);
-  const card = pokemonCards.find(c => c.id === cardSelect.value);
+  const asset = assets.find(a => a.id === currentAsset);
+  const card = pokemonCards.find(c => c.id === currentCard);
   const ratio = asset.currentValue / card.currentPrice;
   const formatted = fmt(ratio);
 
@@ -279,8 +334,8 @@ function update() {
   document.getElementById("cardPrice").textContent = "SGD " + card.currentPrice.toLocaleString();
 }
 
-assetSelect.addEventListener("change", update);
-cardSelect.addEventListener("change", update);
+initDropdown(document.getElementById('assetDropdown'), assetOptions, currentAsset, (val) => { currentAsset = val; update(); });
+initDropdown(document.getElementById('cardDropdown'), cardOptions, currentCard, (val) => { currentCard = val; update(); });
 update();
 </script>
 </body>
