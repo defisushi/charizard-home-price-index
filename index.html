@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Charizard Home Price Index</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     :root {
       --background: hsl(225, 15%, 8%);
@@ -101,11 +100,6 @@
     .conversion-disclaimer { font-size: clamp(0.55rem, 1.2vw, 0.75rem); color: var(--muted-foreground); display: none; }
     @media (min-width: 640px) { .conversion-disclaimer { display: block; } }
 
-    /* Chart */
-    .chart-card { padding: clamp(16px, 3vw, 24px); }
-    .chart-title { font-size: clamp(0.6rem, 1.5vw, 0.85rem); font-family: var(--font-mono); color: var(--muted-foreground); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .chart-wrapper { height: clamp(200px, 40vw, 320px); position: relative; }
-
     /* Footer */
     footer { border-top: 1px solid var(--border); padding: 16px; margin-top: auto; }
     footer p { text-align: center; font-size: clamp(0.55rem, 1.5vw, 0.75rem); font-family: var(--font-mono); color: var(--muted-foreground); }
@@ -195,14 +189,6 @@
 
     </div>
   </div>
-
-  <!-- Chart -->
-  <div class="gradient-card rounded-xl chart-card">
-    <h3 class="chart-title" id="chartTitle"></h3>
-    <div class="chart-wrapper">
-      <canvas id="priceChart"></canvas>
-    </div>
-  </div>
 </main>
 
 <footer>
@@ -272,9 +258,6 @@ pokemonCards.forEach(c => {
 assetSelect.value = "sg-hdb";
 cardSelect.value = "base-charizard-1st-psa10";
 
-// Chart
-let chartInstance = null;
-
 function fmt(v) { return v < 1 ? v.toFixed(4) : v.toFixed(2); }
 
 function update() {
@@ -294,70 +277,6 @@ function update() {
   document.getElementById("cardGrade").textContent = gradeLabel;
   document.getElementById("assetPrice").textContent = "SGD " + asset.currentValue.toLocaleString();
   document.getElementById("cardPrice").textContent = "SGD " + card.currentPrice.toLocaleString();
-  document.getElementById("chartTitle").textContent = `Median ${asset.label} in Charizards`;
-
-  // Build chart data
-  const assetMap = new Map(asset.historicalValues.map(v => [v.date, v.value]));
-  const cardMap = new Map(card.historicalPrices.map(v => [v.date, v.price]));
-  const allDates = [...new Set([...assetMap.keys(), ...cardMap.keys()])].sort();
-  const chartData = allDates.filter(d => assetMap.has(d) && cardMap.has(d)).map(d => ({
-    x: d.replace("-", " "), y: assetMap.get(d) / cardMap.get(d)
-  }));
-
-  const ctx = document.getElementById("priceChart").getContext("2d");
-  if (chartInstance) chartInstance.destroy();
-
-  const gradient = ctx.createLinearGradient(0, 0, 0, 320);
-  gradient.addColorStop(0, "hsla(25, 95%, 55%, 0.4)");
-  gradient.addColorStop(1, "hsla(25, 95%, 55%, 0)");
-
-  chartInstance = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: chartData.map(d => d.x),
-      datasets: [{
-        data: chartData.map(d => d.y),
-        borderColor: "hsl(25, 95%, 55%)",
-        borderWidth: 2,
-        fill: true,
-        backgroundColor: gradient,
-        pointRadius: 3,
-        pointBackgroundColor: "hsl(25, 95%, 55%)",
-        tension: 0.3
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: "hsl(225, 15%, 12%)",
-          borderColor: "hsl(225, 12%, 20%)",
-          borderWidth: 1,
-          titleFont: { family: "JetBrains Mono", size: 11 },
-          bodyFont: { family: "JetBrains Mono", size: 11 },
-          titleColor: "hsl(40, 20%, 92%)",
-          bodyColor: "hsl(40, 20%, 92%)",
-          padding: 8,
-          callbacks: {
-            label: ctx => `${fmt(ctx.raw)} cards`
-          }
-        }
-      },
-      scales: {
-        x: {
-          ticks: { color: "hsl(225, 10%, 50%)", font: { family: "JetBrains Mono", size: 9 }, maxRotation: 45, minRotation: 45 },
-          grid: { color: "hsl(225, 12%, 20%)" },
-          border: { color: "hsl(225, 12%, 20%)" }
-        },
-        y: {
-          ticks: { color: "hsl(225, 10%, 50%)", font: { family: "JetBrains Mono", size: 9 }, callback: v => v < 1 ? v.toFixed(2) : v.toFixed(0) },
-          grid: { color: "hsl(225, 12%, 20%)" },
-          border: { color: "hsl(225, 12%, 20%)" }
-        }
-      }
-    }
-  });
 }
 
 assetSelect.addEventListener("change", update);
